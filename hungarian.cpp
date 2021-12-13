@@ -1,15 +1,15 @@
-///////////////////////////////////////////////////////////////////////////////
-// Hungarian.cpp: Implementation file for Class HungarianAlgorithm.
-// 
-// This is a C++ wrapper with slight modification of a hungarian algorithm implementation by Markus Buehren.
-// The original implementation is a few mex-functions for use in MATLAB, found here:
-// http://www.mathworks.com/matlabcentral/fileexchange/6543-functions-for-the-rectangular-assignment-problem
-// 
-// Both this code and the orignal code are published under the BSD license.
-// by Cong Ma, 2016
-// 
-
+// ///////////////////////////////////////////////////////////////////////////////
+// // Hungarian.cpp: Implementation file for Class HungarianAlgorithm.
+// //
+// // This is a C++ wrapper with slight modification of a hungarian algorithm implementation by Markus Buehren.
+// // The original implementation is a few mex-functions for use in MATLAB, found here:
+// // http://www.mathworks.com/matlabcentral/fileexchange/6543-functions-for-the-rectangular-assignment-problem
+// //
+// // Both this code and the orignal code are published under the BSD license.
+// // by Cong Ma, 2016
+// //
 #include "hungarian.h"
+
 
 
 HungarianAlgorithm::HungarianAlgorithm(){}
@@ -116,7 +116,7 @@ void HungarianAlgorithm::assignmentoptimal(int *assignment, double *cost, double
 		/* Steps 1 and 2a */
 		for (row = 0; row<nOfRows; row++)
 			for (col = 0; col<nOfColumns; col++)
-				if (abs(distMatrix[row + nOfRows*col]) < DBL_EPSILON)
+				if (abs(distMatrix[row + nOfRows*col]) < __DBL_EPSILON__)
 					if (!coveredColumns[col])
 					{
 						starMatrix[row + nOfRows*col] = true;
@@ -151,7 +151,7 @@ void HungarianAlgorithm::assignmentoptimal(int *assignment, double *cost, double
 		/* Steps 1 and 2a */
 		for (col = 0; col<nOfColumns; col++)
 			for (row = 0; row<nOfRows; row++)
-				if (abs(distMatrix[row + nOfRows*col]) < DBL_EPSILON)
+				if (abs(distMatrix[row + nOfRows*col]) < __DBL_EPSILON__)
 					if (!coveredRows[row])
 					{
 						starMatrix[row + nOfRows*col] = true;
@@ -273,7 +273,7 @@ void HungarianAlgorithm::step3(int *assignment, double *distMatrix, bool *starMa
 		for (col = 0; col<nOfColumns; col++)
 			if (!coveredColumns[col])
 				for (row = 0; row<nOfRows; row++)
-					if ((!coveredRows[row]) && (abs(distMatrix[row + nOfRows*col]) < DBL_EPSILON))
+					if ((!coveredRows[row]) && (abs(distMatrix[row + nOfRows*col]) < __DBL_EPSILON__))
 					{
 						/* prime zero */
 						primeMatrix[row + nOfRows*col] = true;
@@ -364,7 +364,7 @@ void HungarianAlgorithm::step5(int *assignment, double *distMatrix, bool *starMa
 	int row, col;
 
 	/* find smallest uncovered element h */
-	h = DBL_MAX;
+	h = __DBL_MAX__;
 	for (row = 0; row<nOfRows; row++)
 		if (!coveredRows[row])
 			for (col = 0; col<nOfColumns; col++)

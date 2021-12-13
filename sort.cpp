@@ -97,12 +97,13 @@ TypeAssociate Sort::dataAssociate(const cv::Mat& bboxesDet, const cv::Mat& bboxe
     cv::Mat iouMat = getIouMatrix(bboxesDet, bboxesPred);   // Mat(M, N)
     cv::Mat distMat = 1.0 - iouMat;
 
-    // Hungarian combinatorial optimization algorithm
+    // Hungarian combinatorial optimization algorithm 
     vector<vector<double>> distVec2D;
     for (int i = 0; i < distMat.rows; ++i)
     {
         vector<double> tmp;
-        tmp.assign(distMat.ptr<float>(i), distMat.ptr<float>(i) + distMat.cols);
+        for (int j = 0; j < distMat.cols; ++j)
+            tmp.push_back(double(distMat.at<float>(i, j)));
         distVec2D.push_back(tmp);
     }
     vector<int> assignment;

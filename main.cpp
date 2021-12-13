@@ -69,11 +69,11 @@ int main(int argc, char** argv)
     }
 
     // SORT
-    shared_ptr<Sort> sort = shared_ptr<Sort>(new Sort(1, 3, 0.3));
+    Sort sort(1, 3, 0.3);
     for (int i = 0; i < vecInputDets.size(); ++i)
     {
         cv::Mat bboxesDet = vecInputDets[i];
-        cv::Mat bboxesPost = sort->update(bboxesDet);
+        cv::Mat bboxesPost = sort.update(bboxesDet);
         for (int j = 0; j < bboxesPost.rows; ++j)
         {
             float xc = bboxesPost.at<float>(j, 0);
@@ -85,8 +85,8 @@ int main(int argc, char** argv)
 
             ofs << (i + 1) << ",-1,"
                 << (xc - w / 2) << "," << (yc - h / 2 ) << "," 
-                << w << "," << h << "," 
-                << "1,-1,-1,-1" << endl;
+                << w << "," << h << "," << trackerId << endl;
+                // << "1,-1,-1,-1" << endl;
         }
     }
     ofs.close();
