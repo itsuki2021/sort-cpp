@@ -15,5 +15,5 @@ SORT was initially described in [this paper](http://arxiv.org/abs/1602.00763) wi
 mkdir build && cd build
 cmake ..
 make
-./demo_sort
+./demo_sort [input txt] [output txt]
 ````
