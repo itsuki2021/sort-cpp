@@ -12,18 +12,22 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <assert.h>
 #include <math.h>
+#include <queue>
 
 #define KF_DIM_X 7      // xc, yc, s, r, dxc/dt, dyc/dt, ds/dt
 #define KF_DIM_Z 4      // xc, yc, s, r
 
 namespace sort
 {
+    using std::queue;
+
     class KalmanBoxTracker
     {
     // variables
     public:
     private:
         static int count;
+        static queue<int> idQueue;
         int id;
         int timeSinceUpdate = 0;
         int hitStreak = 0;
@@ -55,7 +59,12 @@ namespace sort
          */
         cv::Mat predict();
 
-        inline int getId()
+        static inline int getFilterCount()
+        {
+            return KalmanBoxTracker::count;
+        }
+
+        inline int getFilterId()
         {
             return id;
         }

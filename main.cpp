@@ -5,26 +5,17 @@
 using namespace std;
 using namespace sort;
 
-int main(int argc, char** argv)
+
+// read detections from filestream
+vector<cv::Mat> getDetInFrames(string fileName)
 {
-    // if (argc != 3)
-    // {
-    //     cout << "usage: ./demo_sort [input txt] [output txt]" << endl;
-    //     return -1;
-    // }
-    // string inputFile(argv[1]);
-    // string outputFile(argv[2]);
-    string inputFile = "../data/train/ADL-Rundle-6//det/det.txt";
-    string outputFile = "../output/ADL-Rundle-6.txt";
+    vector<cv::Mat> allDet;
 
-    cout << "SORT demo" << endl;
-    vector<cv::Mat> vecInputDets;   // detections in all frames
-
-    ifstream ifs(inputFile);
+    ifstream ifs(fileName);
     if (!ifs.is_open())
     {
-        cerr << "Can not open input file " << inputFile << endl;
-        return -1;
+        cerr << "can not open the file " << fileName << endl;
+        return allDet;
     }
 
     // read detections in frames
@@ -50,29 +41,47 @@ int main(int argc, char** argv)
         }
         else if (frame != crtFrame)
         {
-            vecInputDets.push_back(bboxesDet.clone());
+            allDet.push_back(bboxesDet.clone());
             bboxesDet = cv::Mat::zeros(0, 5, CV_32F);
             crtFrame = frame;
         }
         
         cv::vconcat(bboxesDet, bbox, bboxesDet);
     }
-    vecInputDets.push_back(bboxesDet.clone());
+    allDet.push_back(bboxesDet.clone());
     ifs.close();
-    cout << "Input detection loaded." << endl;
+
+    return allDet;
+}
+
+
+int main(int argc, char** argv)
+{
+    cout << "SORT demo" << endl;
+    if (argc != 3)
+    {
+        cout << "usage: ./demo_sort [input txt] [output txt]" << endl;
+        return -1;
+    }
+    string inputFile(argv[1]);
+    string outputFile(argv[2]);
+    // string inputFile = "../data/train/ADL-Rundle-6//det/det.txt";
+    // string outputFile = "./ADL-Rundle-6.txt";
+
+    vector<cv::Mat> allDet = getDetInFrames(inputFile);
 
     ofstream ofs(outputFile);
     if (!ofs.is_open())
     {
-        cerr << "Can not open output file " << outputFile << endl;
+        cerr << "can not create the file " << outputFile << endl;
         return -1;
     }
 
     // SORT
     Sort sort(1, 3, 0.3);
-    for (int i = 0; i < vecInputDets.size(); ++i)
+    for (int i = 0; i < allDet.size(); ++i)
     {
-        cv::Mat bboxesDet = vecInputDets[i];
+        cv::Mat bboxesDet = allDet[i];
         cv::Mat bboxesPost = sort.update(bboxesDet);
         for (int j = 0; j < bboxesPost.rows; ++j)
         {
@@ -83,14 +92,13 @@ int main(int argc, char** argv)
             float score = bboxesPost.at<float>(j, 4);
             float trackerId = bboxesPost.at<float>(j, 5);
 
-            ofs << (i + 1) << ",-1,"
-                << (xc - w / 2) << "," << (yc - h / 2 ) << "," 
-                << w << "," << h << "," << trackerId << endl;
-                // << "1,-1,-1,-1" << endl;
+            ofs << (i + 1) << ", " << (xc - w / 2) << ", " << (yc - h / 2 ) << ", " 
+                << w << ", " << h << ", " << score << ", \t" << trackerId << " --- " << KalmanBoxTracker::getFilterCount() << endl;
         }
     }
-    ofs.close();
 
-    cout << "Done." << endl;
+    ofs.close();
+    cout << "save tracking result to " << outputFile << endl;
+    cout << "done." << endl;
     return 0;
 }

@@ -2,7 +2,7 @@
 
 C++ implementation of SORT (Simple, online, and realtime tracking of multiple objects in a video sequence).
 
-## Introduction
+## introduction
 
 SORT was initially described in [this paper](http://arxiv.org/abs/1602.00763) with the [python code](https://github.com/abewley/sort), this repo try to reproduce it by using C++.
 
@@ -17,3 +17,6 @@ cmake ..
 make
 ./demo_sort [input txt] [output txt]
 ````
+
+## todo list
+- [x] [hungarian.h](hungarian.h)

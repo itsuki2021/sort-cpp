@@ -3,10 +3,19 @@
 using namespace sort;
 
 int KalmanBoxTracker::count = 0;
+queue<int> KalmanBoxTracker::idQueue;
 
 KalmanBoxTracker::KalmanBoxTracker(const cv::Mat &bbox)
 {   
-    id = KalmanBoxTracker::count++;
+    if (!idQueue.empty())
+    {
+        id = idQueue.front();
+        idQueue.pop();
+    }
+    else
+        id = KalmanBoxTracker::count;
+
+    KalmanBoxTracker::count++;
 
     kf = new cv::KalmanFilter(KF_DIM_X, KF_DIM_Z);  // no control vector
     // state transition matrix (A), x(k) = A*x(k-1) + B*u(k) + w(k)
@@ -58,6 +67,7 @@ KalmanBoxTracker::KalmanBoxTracker(const cv::Mat &bbox)
 KalmanBoxTracker::~KalmanBoxTracker()
 {
     KalmanBoxTracker::count--;
+    idQueue.push(id);
     delete kf;
 }
 

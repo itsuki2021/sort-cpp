@@ -49,7 +49,7 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
         if (trackers[predInd]->getHitStreak() >= minHits)
         {
             float score = bboxesDet.at<float>(detInd, 4);
-            int trackerId = trackers[predInd]->getId();
+            int trackerId = trackers[predInd]->getFilterId();
             cv::vconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(score)), bboxPost);      // score
             cv::vconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(trackerId)), bboxPost);  // tracker id
             cv::transpose(bboxPost, bboxPost);  // Mat(1, 6)
