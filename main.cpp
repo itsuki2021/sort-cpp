@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     }
     string inputFile(argv[1]);
     string outputFile(argv[2]);
-    // string inputFile = "../data/train/ADL-Rundle-6//det/det.txt";
+    // string inputFile = "../data/train/ADL-Rundle-6/det/det.txt";
     // string outputFile = "./ADL-Rundle-6.txt";
 
     vector<cv::Mat> allDet = getDetInFrames(inputFile);
@@ -79,21 +79,21 @@ int main(int argc, char** argv)
 
     // SORT
     Sort sort(1, 3, 0.3);
-    for (int i = 0; i < allDet.size(); ++i)
+    for (int frame = 0; frame < allDet.size(); ++frame)
     {
-        cv::Mat bboxesDet = allDet[i];
+        cv::Mat bboxesDet = allDet[frame];
         cv::Mat bboxesPost = sort.update(bboxesDet);
-        for (int j = 0; j < bboxesPost.rows; ++j)
+        for (int cnt = 0; cnt < bboxesPost.rows; ++cnt)
         {
-            float xc = bboxesPost.at<float>(j, 0);
-            float yc = bboxesPost.at<float>(j, 1);
-            float w = bboxesPost.at<float>(j, 2);
-            float h = bboxesPost.at<float>(j, 3);
-            float score = bboxesPost.at<float>(j, 4);
-            float trackerId = bboxesPost.at<float>(j, 5);
+            float xc = bboxesPost.at<float>(cnt, 0);
+            float yc = bboxesPost.at<float>(cnt, 1);
+            float w = bboxesPost.at<float>(cnt, 2);
+            float h = bboxesPost.at<float>(cnt, 3);
+            float score = bboxesPost.at<float>(cnt, 4);
+            float trackerId = bboxesPost.at<float>(cnt, 5);
 
-            ofs << (i + 1) << ", " << (xc - w / 2) << ", " << (yc - h / 2 ) << ", " 
-                << w << ", " << h << ", " << score << ", \t" << trackerId << " --- " << KalmanBoxTracker::getFilterCount() << endl;
+            ofs << (frame + 1) << "," << (xc - w / 2) << "," << (yc - h / 2 ) << "," 
+                << w << "," << h << "," << score << "," << trackerId << endl;
         }
     }
 

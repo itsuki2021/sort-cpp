@@ -38,7 +38,7 @@ namespace sort
     public:
         /**
          * @brief Kalman filter for bbox tracking
-         * @param bbox Mat(4+, 1), [xc; yc; w; h; ...]
+         * @param bbox bounding box, Mat(1, 4+) [xc, yc, w, h, ...]
          */
         explicit KalmanBoxTracker(const cv::Mat &bbox);
 
@@ -48,14 +48,14 @@ namespace sort
 
         /**
          * @brief updates the state vector with observed bbox. 
-         * @param bbox  boundary box (x center, y center, width, height)
-         * @return corrected bounding box estimate
+         * @param bbox  boundary box, Mat(1, 4+) [xc, yc, w, h, ...]
+         * @return corrected bounding box estimate, Mat(1, 4)
          */
         cv::Mat update(const cv::Mat &bbox);
 
         /**
          * @brief advances the state vector and returns the predicted bounding box estimate. 
-         * @return predicted bounding box estimate, NOT THE CORRECTED ONE!
+         * @return predicted bounding box, Mat(1, 4)
          */
         cv::Mat predict();
 
@@ -87,46 +87,34 @@ namespace sort
     private:
         /**
          * @brief convert boundary box to measurement.
-         * @param bbox boundary box (x center, y center, width, height)
-         * @return measurement vector (x center, y center, scale/area, aspect ratio)
+         * @param bbox boundary box (1, 4+) [x center, y center, width, height, ...]
+         * @return measurement vector (4, 1) [x center; y center; scale/area; aspect ratio]
          */
         static inline cv::Mat convertBBoxToZ(const cv::Mat &bbox)
         {
-            assert(bbox.rows == 1 && bbox.cols >= 1);
+            assert(bbox.rows == 1 && bbox.cols >= 4);
             float x = bbox.at<float>(0, 0);
             float y = bbox.at<float>(0, 1);
             float s = bbox.at<float>(0, 2) * bbox.at<float>(0, 3);
             float r = bbox.at<float>(0, 2) / bbox.at<float>(0, 3);
 
-            return (cv::Mat_<float>(4, 1) << x, y, s, r);
+            return (cv::Mat_<float>(KF_DIM_Z, 1) << x, y, s, r);
         }
 
         /**
          * @brief convert state vector to boundary box.
-         * @param state state vector (x center, y center, scale/area, aspect ratio, ...)
-         * @return boundary box (x center, y center, width, height)
+         * @param state state vector (7, 1) (x center; y center; scale/area; aspect ratio; ...)
+         * @return boundary box (1, 4) [x center, y center, width, height]
          */
         static inline cv::Mat convertXToBBox(const cv::Mat &state)
         {
-            assert(state.rows >= 4 && state.cols == 1);
+            assert(state.rows == KF_DIM_X && state.cols == 1);
             float x = state.at<float>(0, 0);
             float y = state.at<float>(0, 1);
             float w = sqrt(state.at<float>(0, 2) * state.at<float>(0, 3));
             float h = state.at<float>(0, 2) / w;
 
-            return (cv::Mat_<float>(4, 1) << x, y, w, h);
-        }
-
-        /**
-         * @brief convert state vector to boundary box with score.
-         * @param state state vector (x center, y center, scale/area, aspect ratio, ...)
-         * @return boundary box with score (x center, y center, width, height, score)
-         */
-        static inline cv::Mat convertXToBBox(const cv::Mat &state, float score)
-        {
-            cv::Mat bbox = KalmanBoxTracker::convertXToBBox(state);
-            cv::vconcat(bbox, cv::Mat(1, 1, CV_32F, cv::Scalar(score)), bbox);
-            return bbox;
+            return (cv::Mat_<float>(1, 4) << x, y, w, h);
         }
     };
 }

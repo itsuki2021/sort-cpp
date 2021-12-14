@@ -45,9 +45,11 @@ namespace sort{
         Sort& operator=(const Sort&) = delete;
 
         /**
-         * @brief bbox tracking in SORT, this method must be called once for each frame even with empty detections
-         * @param bboxesDet Mat(M, 5), detections in the format [[xc1,yc1,w1,h1,score],[xc2,yc2,w2,h2,score],...]
-         * @return matched bboxes, the number of objects retured may differ from the number of detections provided.
+         * @brief bbox tracking in SORT, this method must be called once for each frame even with empty detections, 
+         *        the number of objects retured may differ from the number of detections provided.
+         * @param bboxesDet detections, Mat(M, 5) with the format [[xc1,yc1,w1,h1,score1];[xc2,yc2,w2,h2,score2];...]
+         * @return matched bboxes, Mat(N, 6) with the format [[xc1,yc1,w1,h1,score1,tracker_id1];[...];...].
+         
          */
         cv::Mat update(const cv::Mat &bboxesDet);
     private:
@@ -66,17 +68,17 @@ namespace sort{
 
         /**
          * @brief data associate in SORT
-         * @param bboxesDet detected bboxes, M * 5
-         * @param bboxesPred predicted bboxes, N * 5
+         * @param bboxesDet detected bboxes, Mat(M, 4+)
+         * @param bboxesPred predicted bboxes, Mat(N, 4+)
          * @return associate tuple (matched pairs, lost detections, lost predictions)
          */
         TypeAssociate dataAssociate(const cv::Mat& bboxesDet, const cv::Mat& bboxesPred);
 
         /**
          * @brief IoU of bboxes
-         * @param bboxesA input bboxes A, M * (xc, yc, w, h, ...)
-         * @param bboxesB another input bboxes B, N * (xc, yc, w, h, ...)
-         * @return MxN matrix, value(i, j) means IoU of A(i) and B(j)
+         * @param bboxesA input bboxes A, Mat(M, 4+)
+         * @param bboxesB another input bboxes B, Mat(N, 4+)
+         * @return M x N matrix, value(i, j) means IoU of A(i) and B(j)
          */
         static cv::Mat getIouMatrix(const cv::Mat& bboxesA, const cv::Mat& bboxesB);
     };

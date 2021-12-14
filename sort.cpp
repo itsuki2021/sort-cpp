@@ -16,20 +16,20 @@ Sort::~Sort()
 
 cv::Mat Sort::update(const cv::Mat &bboxesDet)
 {
-    assert(bboxesDet.rows >= 0 && bboxesDet.cols == 5); // bboxesDet's shape (M, 5)
+    assert(bboxesDet.rows >= 0 && bboxesDet.cols == 5); // detections, [xc, yc, w, h, score]
 
-    cv::Mat bboxesPred(0, 4, CV_32F, cv::Scalar(0));  // predictions used in data association, (xc, yc, w, h)
-    cv::Mat bboxesPost(0, 6, CV_32F, cv::Scalar(0));  // bounding boxes estimate, (xc, yc, w, h, score, obj_id)
+    cv::Mat bboxesPred(0, 5, CV_32F, cv::Scalar(0));  // predictions used in data association, [xc, yc, w, h, dummy]
+    cv::Mat bboxesPost(0, 6, CV_32F, cv::Scalar(0));  // bounding boxes estimate, [xc, yc, w, h, score, obj_id]
 
     // kalman bbox tracker predict
     for (auto it = trackers.begin(); it != trackers.end();)
     {
-        cv::Mat bboxPred = (*it)->predict();   // shape(4, 1), (xc, yc, w, h)
+        cv::Mat bboxPred = (*it)->predict();   // Mat(1, 4)
         if (isAnyNan<float>(bboxPred))
             trackers.erase(it);     // remove the NAN value and corresponding tracker
         else{
-            cv::transpose(bboxPred, bboxPred);  // bboxPred's shape (1, 4)
-            cv::vconcat(bboxesPred, bboxPred, bboxesPred);  // bboxesPred's shape (N, 4)
+            cv::hconcat(bboxPred, cv::Mat(1, 1, CV_32F,cv::Scalar(0)), bboxPred);   // Mat(1, 5)
+            cv::vconcat(bboxesPred, bboxPred, bboxesPred);  // Mat(N, 5)
             ++it;
         }
     }
@@ -50,9 +50,8 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
         {
             float score = bboxesDet.at<float>(detInd, 4);
             int trackerId = trackers[predInd]->getFilterId();
-            cv::vconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(score)), bboxPost);      // score
-            cv::vconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(trackerId)), bboxPost);  // tracker id
-            cv::transpose(bboxPost, bboxPost);  // Mat(1, 6)
+            cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(score)), bboxPost);      // score
+            cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(trackerId)), bboxPost);  // tracker id
             cv::vconcat(bboxesPost, bboxPost, bboxesPost);  // Mat(N, 6)
         }
     }
@@ -127,6 +126,7 @@ TypeAssociate Sort::dataAssociate(const cv::Mat& bboxesDet, const cv::Mat& bboxe
 
 cv::Mat Sort::getIouMatrix(const cv::Mat& bboxesA, const cv::Mat& bboxesB)
 {
+    assert(bboxesA.cols >= 4 && bboxesB.cols >= 4);
     int numA = bboxesA.rows;
     int numB = bboxesB.rows;
     cv::Mat iouMat(numA, numB, CV_32F, cv::Scalar(0.0));
