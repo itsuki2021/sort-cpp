@@ -16,10 +16,10 @@ Sort::~Sort()
 
 cv::Mat Sort::update(const cv::Mat &bboxesDet)
 {
-    assert(bboxesDet.rows >= 0 && bboxesDet.cols == 5); // detections, [xc, yc, w, h, score]
+    assert(bboxesDet.rows >= 0 && bboxesDet.cols == 6); // detections, [xc, yc, w, h, score, class_id]
 
-    cv::Mat bboxesPred(0, 5, CV_32F, cv::Scalar(0));  // predictions used in data association, [xc, yc, w, h, dummy]
-    cv::Mat bboxesPost(0, 6, CV_32F, cv::Scalar(0));  // bounding boxes estimate, [xc, yc, w, h, score, obj_id]
+    cv::Mat bboxesPred(0, 6, CV_32F, cv::Scalar(0));  // predictions used in data association, [xc, yc, w, h, ...]
+    cv::Mat bboxesPost(0, 7, CV_32F, cv::Scalar(0));  // bounding boxes estimate, [xc, yc, w, h, score, class_id, tracker_id]
 
     // kalman bbox tracker predict
     for (auto it = trackers.begin(); it != trackers.end();)
@@ -28,8 +28,8 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
         if (isAnyNan<float>(bboxPred))
             trackers.erase(it);     // remove the NAN value and corresponding tracker
         else{
-            cv::hconcat(bboxPred, cv::Mat(1, 1, CV_32F,cv::Scalar(0)), bboxPred);   // Mat(1, 5)
-            cv::vconcat(bboxesPred, bboxPred, bboxesPred);  // Mat(N, 5)
+            cv::hconcat(bboxPred, cv::Mat(1, 2, CV_32F,cv::Scalar(0)), bboxPred);   // Mat(1, 6)
+            cv::vconcat(bboxesPred, bboxPred, bboxesPred);  // Mat(N, 6)
             ++it;
         }
     }
@@ -49,10 +49,12 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
         if (trackers[predInd]->getHitStreak() >= minHits)
         {
             float score = bboxesDet.at<float>(detInd, 4);
+            int classId = bboxesDet.at<float>(detInd, 5);
             int trackerId = trackers[predInd]->getFilterId();
             cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(score)), bboxPost);      // score
+            cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(classId)), bboxPost);    // classId
             cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(trackerId)), bboxPost);  // tracker id
-            cv::vconcat(bboxesPost, bboxPost, bboxesPost);  // Mat(N, 6)
+            cv::vconcat(bboxesPost, bboxPost, bboxesPost);  // Mat(N, 7)
         }
     }
 

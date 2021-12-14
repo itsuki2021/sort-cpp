@@ -24,7 +24,7 @@ vector<cv::Mat> getDetInFrames(string fileName)
     int crtFrame = -1, frame, classId;
     char dummy;
     float x, y, w, h, score;
-    cv::Mat bboxesDet = cv::Mat::zeros(0, 5, CV_32F);   // detections in one frame
+    cv::Mat bboxesDet = cv::Mat::zeros(0, 6, CV_32F);   // detections in one frame
     while (getline(ifs, line))
     {
         
@@ -33,7 +33,7 @@ vector<cv::Mat> getDetInFrames(string fileName)
         iss >> x >> dummy >> y >> dummy >> w >> dummy >> h >> dummy >> score;
         iss.str("");
 
-        cv::Mat bbox = (cv::Mat_<float>(1, 5) << x + w/2, y + h/2, w, h, score);
+        cv::Mat bbox = (cv::Mat_<float>(1, 6) << x + w/2, y + h/2, w, h, score, classId);
 
         if (crtFrame == -1)
         {
@@ -42,7 +42,7 @@ vector<cv::Mat> getDetInFrames(string fileName)
         else if (frame != crtFrame)
         {
             allDet.push_back(bboxesDet.clone());
-            bboxesDet = cv::Mat::zeros(0, 5, CV_32F);
+            bboxesDet = cv::Mat::zeros(0, 6, CV_32F);
             crtFrame = frame;
         }
         
@@ -90,10 +90,11 @@ int main(int argc, char** argv)
             float w = bboxesPost.at<float>(cnt, 2);
             float h = bboxesPost.at<float>(cnt, 3);
             float score = bboxesPost.at<float>(cnt, 4);
-            float trackerId = bboxesPost.at<float>(cnt, 5);
+            float classId = bboxesPost.at<float>(cnt, 5);
+            float trackerId = bboxesPost.at<float>(cnt, 6);
 
             ofs << (frame + 1) << "," << (xc - w / 2) << "," << (yc - h / 2 ) << "," 
-                << w << "," << h << "," << score << "," << trackerId << endl;
+                << w << "," << h << "," << score << "," << classId << "," << trackerId << endl;
         }
     }
 
