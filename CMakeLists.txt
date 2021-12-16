@@ -2,9 +2,13 @@ cmake_minimum_required(VERSION 3.0.2)
 project(sort)
 
 set(CMAKE_CXX_STANDARD 11)
-set(OpenCV_DIR /usr/local/share/OpenCV/)
 
+# opencv
+set(OpenCV_DIR /usr/local/share/OpenCV/)
 find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+link_directories(${OpenCV_LIBRARY_DIRS})
+add_definitions(${OpenCV_DEFINITIONS})
 
 add_library(${PROJECT_NAME} SHARED sort.cpp kalman_box_tracker.cpp hungarian.cpp)
 
