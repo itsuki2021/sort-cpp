@@ -113,7 +113,7 @@ cv::Mat KalmanBoxTracker::predict()
     cv::Mat xPred = kf->predict();
     cv::Mat bboxPred = convertXToBBox(xPred);
 
-    hitStreak = 0 ? timeSinceUpdate > 0 : hitStreak;
+    hitStreak = timeSinceUpdate > 0 ? 0 : hitStreak;
     timeSinceUpdate++;
 
     return bboxPred;
