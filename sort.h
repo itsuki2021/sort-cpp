@@ -51,8 +51,7 @@ namespace sort{
          * @brief bbox tracking in SORT, this method must be called once for each frame even with empty detections, 
          *        the number of objects retured may differ from the number of detections provided.
          * @param bboxesDet detections, Mat(M, 6) with the format [[xc,yc,w,h,score,class_id];[...];...]
-         * @return matched bboxes, Mat(N, 7) with the format [[xc1,yc1,w1,h1,score1,class_id,tracker_id1];[...];...].
-         
+         * @return matched bboxes, Mat(N, 9) with the format [[xc,yc,w,h,score,class_id,dx,dy,tracker_id];[...];...].
          */
         cv::Mat update(const cv::Mat &bboxesDet);
     private:

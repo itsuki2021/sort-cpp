@@ -90,8 +90,10 @@ int main(int argc, char** argv)
             float w = bboxesPost.at<float>(cnt, 2);
             float h = bboxesPost.at<float>(cnt, 3);
             float score = bboxesPost.at<float>(cnt, 4);
-            float classId = bboxesPost.at<float>(cnt, 5);
-            float trackerId = bboxesPost.at<float>(cnt, 6);
+            int classId = bboxesPost.at<float>(cnt, 5);
+            float dx = bboxesPost.at<float>(cnt, 6);
+            float dy = bboxesPost.at<float>(cnt, 7);
+            int trackerId = bboxesPost.at<float>(cnt, 8);
 
             ofs << (frame + 1) << "," << (xc - w / 2) << "," << (yc - h / 2 ) << "," 
                 << w << "," << h << "," << score << "," << classId << "," << trackerId << endl;

@@ -19,7 +19,7 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
     assert(bboxesDet.rows >= 0 && bboxesDet.cols == 6); // detections, [xc, yc, w, h, score, class_id]
 
     cv::Mat bboxesPred(0, 6, CV_32F, cv::Scalar(0));  // predictions used in data association, [xc, yc, w, h, ...]
-    cv::Mat bboxesPost(0, 7, CV_32F, cv::Scalar(0));  // bounding boxes estimate, [xc, yc, w, h, score, class_id, tracker_id]
+    cv::Mat bboxesPost(0, 9, CV_32F, cv::Scalar(0));  // bounding boxes estimate, [xc, yc, w, h, score, class_id, vx, vy, tracker_id]
 
     // kalman bbox tracker predict
     for (auto it = trackers.begin(); it != trackers.end();)
@@ -50,11 +50,12 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
         {
             float score = bboxesDet.at<float>(detInd, 4);
             int classId = bboxesDet.at<float>(detInd, 5);
+            float dx = trackers[predInd]->getState().at<float>(4, 0);
+            float dy = trackers[predInd]->getState().at<float>(5, 0);
             int trackerId = trackers[predInd]->getFilterId();
-            cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(score)), bboxPost);      // score
-            cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(classId)), bboxPost);    // classId
-            cv::hconcat(bboxPost, cv::Mat(1, 1, CV_32F, cv::Scalar(trackerId)), bboxPost);  // tracker id
-            cv::vconcat(bboxesPost, bboxPost, bboxesPost);  // Mat(N, 7)
+            cv::Mat tailData = (cv::Mat_<float>(1, 5) << score, classId, dx, dy, trackerId);
+            cv::hconcat(bboxPost, tailData, bboxPost);
+            cv::vconcat(bboxesPost, bboxPost, bboxesPost);  // Mat(N, 9)
         }
     }
 
