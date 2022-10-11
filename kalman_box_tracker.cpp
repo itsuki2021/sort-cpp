@@ -17,7 +17,7 @@ KalmanBoxTracker::KalmanBoxTracker(const cv::Mat &bbox)
 
     KalmanBoxTracker::count++;
 
-    kf = new cv::KalmanFilter(KF_DIM_X, KF_DIM_Z);  // no control vector
+    kf = std::make_shared<cv::KalmanFilter>(KF_DIM_X, KF_DIM_Z);  // no control vector
     // state transition matrix (A), x(k) = A*x(k-1) + B*u(k) + w(k)
     kf->transitionMatrix = (cv::Mat_<float>(KF_DIM_X, KF_DIM_X) <<
                                 1, 0, 0, 0, 1, 0, 0,
@@ -68,29 +68,6 @@ KalmanBoxTracker::~KalmanBoxTracker()
 {
     KalmanBoxTracker::count--;
     idQueue.push(id);
-    delete kf;
-}
-
-
-KalmanBoxTracker::KalmanBoxTracker(const KalmanBoxTracker& kbt)
-{
-    if (this == &kbt)   return;
-
-    id = KalmanBoxTracker::count++;
-    timeSinceUpdate = kbt.timeSinceUpdate;
-    hitStreak = kbt.hitStreak;
-    kf = new cv::KalmanFilter(KF_DIM_X, KF_DIM_Z);
-    *kf = *(kbt.kf);
-}
-
-
-void KalmanBoxTracker::operator=(const KalmanBoxTracker& kbt)
-{
-    if (this == &kbt)   return;
-
-    timeSinceUpdate = kbt.timeSinceUpdate;
-    hitStreak = kbt.hitStreak;
-    *kf = *(kbt.kf);
 }
 
 

@@ -9,7 +9,7 @@
 #pragma once
 
 #include <memory>
-#include "hungarian.h"
+#include "kuhn_munkres.h"
 #include "kalman_box_tracker.h"
 
 namespace sort{
@@ -18,24 +18,27 @@ namespace sort{
     using std::pair;
     using std::tuple;
     using std::make_tuple;
-
-    typedef shared_ptr<KalmanBoxTracker> KalmanBoxTrackerPtr;
-    typedef shared_ptr<HungarianAlgorithm> HungarianAlgorithmPtr;
-    typedef vector<pair<int, int> > TypeMatchedPairs;    // first: detected id, second: predicted id
-    typedef vector<int> TypeLostDets;
-    typedef vector<int> TypeLostPreds;
-    typedef tuple<TypeMatchedPairs, TypeLostDets, TypeLostPreds> TypeAssociate;
+    using std::make_shared;
+    using kuhn_munkres::KuhnMunkres;
+    using kuhn_munkres::Vec2f;
+    using kuhn_munkres::Vec1f;
+    
+    using TypeMatchedPairs = vector<pair<int, int> >;   // first: detected id, second: predicted id
+    using TypeLostDets = vector<int>;
+    using TypeLostPreds = vector<int>;
+    using TypeAssociate = tuple<TypeMatchedPairs, TypeLostDets, TypeLostPreds>;
 
     class Sort
     {
     // variables
     public:
+        using Ptr = std::shared_ptr<Sort>;
     private:
         int maxAge;         // tracker's maximal unmatch count
         int minHits;        // tracker's minimal match count
         float iouThresh;    // IoU threshold
-        vector<KalmanBoxTrackerPtr> trackers;
-        HungarianAlgorithmPtr hg;
+        vector<KalmanBoxTracker::Ptr> trackers;
+        KuhnMunkres::Ptr km = nullptr;
 
     // methods
     public:

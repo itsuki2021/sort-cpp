@@ -17,6 +17,3 @@ cmake ..
 make
 ./demo_sort [input txt] [output txt]
 ````
-
-## todo list
-- [x] [hungarian.h](hungarian.h)

@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <math.h>
 #include <queue>
+#include <memory>
 
 #define KF_DIM_X 7      // xc, yc, s, r, dxc/dt, dyc/dt, ds/dt
 #define KF_DIM_Z 4      // xc, yc, s, r
@@ -25,13 +26,14 @@ namespace sort
     {
     // variables
     public:
+        using Ptr = std::shared_ptr<KalmanBoxTracker>;
     private:
         static int count;
         static queue<int> idQueue;
         int id;
         int timeSinceUpdate = 0;
         int hitStreak = 0;
-        cv::KalmanFilter *kf = nullptr;
+        std::shared_ptr<cv::KalmanFilter> kf = nullptr;
         cv::Mat xPost;
     
     // methods
@@ -43,8 +45,8 @@ namespace sort
         explicit KalmanBoxTracker(const cv::Mat &bbox);
 
         virtual ~KalmanBoxTracker();
-        KalmanBoxTracker(const KalmanBoxTracker&);
-        void operator=(const KalmanBoxTracker&);
+        KalmanBoxTracker(const KalmanBoxTracker&) = delete;
+        void operator=(const KalmanBoxTracker&) = delete;
 
         /**
          * @brief updates the state vector with observed bbox. 

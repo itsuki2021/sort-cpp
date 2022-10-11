@@ -5,7 +5,7 @@ using namespace sort;
 Sort::Sort(int maxAge, int minHits, float iouThresh)
     : maxAge(maxAge), minHits(minHits), iouThresh(iouThresh)
 {
-    hg = HungarianAlgorithmPtr(new HungarianAlgorithm());
+    km = std::make_shared<KuhnMunkres>();
 }
 
 
@@ -71,7 +71,7 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
     for (int lostInd : lostDets)
     {
         cv::Mat lostBbox = bboxesDet.rowRange(lostInd, lostInd + 1);
-        trackers.push_back(KalmanBoxTrackerPtr(new KalmanBoxTracker(lostBbox)));
+        trackers.push_back(make_shared<KalmanBoxTracker>(lostBbox));
     }
 
     return bboxesPost;
@@ -94,32 +94,21 @@ TypeAssociate Sort::dataAssociate(const cv::Mat& bboxesDet, const cv::Mat& bboxe
     if (bboxesDet.rows == 0 || bboxesPred.rows == 0)
         return make_tuple(matchedDetPred, lostDets, lostPreds);
 
-    // compute distance (or cost) matrix
+    // compute IoU matrix
     cv::Mat iouMat = getIouMatrix(bboxesDet, bboxesPred);   // Mat(M, N)
-    cv::Mat distMat = 1.0 - iouMat;
 
-    // Hungarian combinatorial optimization algorithm 
-    vector<vector<double>> distVec2D;
-    for (int i = 0; i < distMat.rows; ++i)
-    {
-        vector<double> tmp;
-        for (int j = 0; j < distMat.cols; ++j)
-            tmp.push_back(double(distMat.at<float>(i, j)));
-        distVec2D.push_back(tmp);
-    }
-    vector<int> assignment;
-    hg->Solve(distVec2D, assignment);   // assignment, length=M
+    // Kuhn Munkres assignment algorithm
+    Vec2f costMatrix(iouMat.rows, Vec1f(iouMat.cols, 0.0f));
+    for (int i = 0; i < iouMat.rows; ++i)
+        for (int j = 0; j < iouMat.cols; ++j)
+            costMatrix[i][j] = 1.0f - iouMat.at<float>(i, j);
+    auto indices = km->compute(costMatrix);
 
     // find matched pairs and lost detect and predict
-    for (int detInd = 0; detInd < assignment.size(); ++detInd)
-    {
-        int predInd = assignment[detInd];
-        if (predInd != -1 && iouMat.at<float>(detInd, predInd) >= iouThresh)
-        {
-            matchedDetPred.push_back(pair<int, int>(detInd, predInd));
-            lostDets.erase(remove(lostDets.begin(), lostDets.end(), detInd), lostDets.end());
-            lostPreds.erase(remove(lostPreds.begin(), lostPreds.end(), predInd), lostPreds.end());
-        }
+    for (auto [detInd, predInd] : indices) {
+        matchedDetPred.push_back({detInd, predInd});
+        lostDets.erase(remove(lostDets.begin(), lostDets.end(), detInd), lostDets.end());
+        lostPreds.erase(remove(lostPreds.begin(), lostPreds.end(), predInd), lostPreds.end());
     }
 
     return make_tuple(matchedDetPred, lostDets, lostPreds);
