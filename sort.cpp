@@ -59,13 +59,13 @@ cv::Mat Sort::update(const cv::Mat &bboxesDet)
     }
 
     // remove dead trackers
-    for (auto it = trackers.begin(); it != trackers.end(); )
-    {
-        if ((*it)->getTimeSinceUpdate() > maxAge)
-            trackers.erase(it);
-        else
-            ++it;
-    }
+    trackers.erase(
+        std::remove_if(trackers.begin(), trackers.end(),
+            [&](const KalmanBoxTracker::Ptr& kbt)->bool {
+                return kbt->getTimeSinceUpdate() > maxAge;
+            }),
+        trackers.end()
+    );
 
     // create and initialize new trackers for unmatched detections
     for (int lostInd : lostDets)
