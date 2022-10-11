@@ -12,7 +12,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <assert.h>
 #include <math.h>
-#include <queue>
 #include <memory>
 
 #define KF_DIM_X 7      // xc, yc, s, r, dxc/dt, dyc/dt, ds/dt
@@ -20,8 +19,6 @@
 
 namespace sort
 {
-    using std::queue;
-
     class KalmanBoxTracker
     {
     // variables
@@ -29,7 +26,6 @@ namespace sort
         using Ptr = std::shared_ptr<KalmanBoxTracker>;
     private:
         static int count;
-        static queue<int> idQueue;
         int id;
         int timeSinceUpdate = 0;
         int hitStreak = 0;
