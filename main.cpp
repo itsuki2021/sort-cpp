@@ -58,15 +58,15 @@ vector<cv::Mat> getDetInFrames(string fileName)
 int main(int argc, char** argv)
 {
     cout << "SORT demo" << endl;
-    // if (argc != 3)
-    // {
-    //     cout << "usage: ./demo_sort [input txt] [output txt]" << endl;
-    //     return -1;
-    // }
-    // string inputFile(argv[1]);
-    // string outputFile(argv[2]);
-    string inputFile = "../data/train/ADL-Rundle-6/det/det.txt";
-    string outputFile = "./ADL-Rundle-6.txt";
+    if (argc != 3)
+    {
+        cout << "usage: ./demo_sort [input txt] [output txt]" << endl;
+        return -1;
+    }
+    string inputFile(argv[1]);
+    string outputFile(argv[2]);
+    // string inputFile = "../data/train/ADL-Rundle-6/det/det.txt";
+    // string outputFile = "./ADL-Rundle-6.txt";
 
     vector<cv::Mat> allDet = getDetInFrames(inputFile);
 

@@ -112,9 +112,9 @@ namespace sort
         {
             assert(state.rows == KF_DIM_X && state.cols == 1);
             float x = state.at<float>(0, 0);
-            float y = state.at<float>(0, 1);
-            float w = sqrt(state.at<float>(0, 2) * state.at<float>(0, 3));
-            float h = state.at<float>(0, 2) / w;
+            float y = state.at<float>(1, 0);
+            float w = sqrt(state.at<float>(2, 0) * state.at<float>(3, 0));
+            float h = state.at<float>(2, 0) / w;
 
             return (cv::Mat_<float>(1, 4) << x, y, w, h);
         }
