@@ -20,7 +20,7 @@ vector<pair<int, int> > KuhnMunkres::compute(const Vec2f& costMatrix) {
     this->colCovered = Vec1b(n, false);
     this->Z0_r = 0;
     this->Z0_c = 0;
-    this->path = KuhnMunkres::makeMatrix(n * n, 0);
+    this->path = Vec2i(n*n, Vec1i(2));
     this->marked = KuhnMunkres::makeMatrix(n, 0);
     vector<StepFunc> steps = {
         nullptr,
