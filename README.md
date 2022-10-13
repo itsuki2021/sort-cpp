@@ -1,4 +1,5 @@
 # sort-cpp
+![avatar](data/tracking.jpg)
 
 C++ implementation of SORT (Simple, online, and realtime tracking of multiple objects in a video sequence).
 

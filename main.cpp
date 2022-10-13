@@ -41,7 +41,7 @@ vector<string> split(const string& s, char delim) {
 }
 
 // (seq info, [(image, detection), ...])
-tuple<map<string, string>, vector<pair<Mat, Mat>>> getInputData(string dataFolder) {
+tuple<map<string, string>, vector<pair<Mat, Mat>>> getInputData(string dataFolder, bool useGT=false) {
     if (*dataFolder.end() != '/') dataFolder += '/';
 
     ifstream ifs;
@@ -76,7 +76,8 @@ tuple<map<string, string>, vector<pair<Mat, Mat>>> getInputData(string dataFolde
         pairs[i].first = cv::imread(imgPaths[i]);
 
     // read detections
-    ifs.open(dataFolder + "/det/det.txt");
+    if (useGT) ifs.open(dataFolder + "/gt/gt.txt");
+    else ifs.open(dataFolder + "/det/det.txt");
     assert (ifs.is_open());
     float x0, y0, w, h, score;
     int frameId, objId;
