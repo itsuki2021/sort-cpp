@@ -7,6 +7,7 @@
  * @author: lst
  * @date:   10/10/2022
  */
+#pragma once
 
 #include <vector>
 #include <memory>
