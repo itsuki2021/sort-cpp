@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sort)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # opencv
 set(OpenCV_DIR /usr/local/share/OpenCV/)
@@ -10,7 +10,16 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${OpenCV_DEFINITIONS})
 
-add_library(${PROJECT_NAME} SHARED sort.cpp kalman_box_tracker.cpp hungarian.cpp)
+# include
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include/
+)
 
+# add library from source files
+file(GLOB_RECURSE SRC_FILES src/*.cpp)
+add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBRARIES})
+
+# add executable
 add_executable(demo_${PROJECT_NAME} main.cpp)
-target_link_libraries(demo_${PROJECT_NAME} ${PROJECT_NAME} ${OpenCV_LIBRARIES})
+target_link_libraries(demo_${PROJECT_NAME} ${PROJECT_NAME})
